@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="一个本地优先的轻量账号密码管理工具。">
+  <title>账号本</title>
+  <link rel="stylesheet" href="./src/styles.css">
+  <script defer src="./src/crypto.js"></script>
+  <script defer src="./src/storage.js"></script>
+  <script defer src="./src/app.js"></script>
+</head>
+<body>
+  <main class="shell">
+    <header class="topbar">
+      <div class="brand">
+        <div class="mark" aria-hidden="true">
+          <svg viewBox="0 0 24 24" focusable="false">
+            <circle cx="7.5" cy="14.5" r="3.5"></circle>
+            <path d="M10.2 11.8 20 2"></path>
+            <path d="M15.5 6.5 18 9"></path>
+            <path d="M13.2 8.8 15 10.6"></path>
+          </svg>
+        </div>
+        <div>
+          <h1>账号本</h1>
+          <p class="subtitle">常用网址、账号和密码，放在本机</p>
+        </div>
+      </div>
+      <div id="status" class="status">未解锁</div>
+    </header>
+
+    <section id="unlockView" class="unlock card">
+      <div>
+        <h2>先解锁</h2>
+        <p class="hint">第一次输入的密码会作为以后打开账号本的密码。它只用来解密，不会存起来。</p>
+      </div>
+      <label>
+        打开密码
+        <input id="masterPassword" type="password" autocomplete="current-password" placeholder="输入打开这个账号本的密码">
+      </label>
+      <div class="row">
+        <button id="unlockBtn" class="grow">解锁</button>
+        <button id="newVaultBtn" class="secondary" type="button">重建</button>
+      </div>
+      <p class="notice">这个密码要记住。忘了以后，已经保存的内容就打不开了。</p>
+    </section>
+
+    <section id="appView" class="app">
+      <aside>
+        <div class="toolbar card">
+          <div class="row">
+            <button id="addBtn" class="grow">加一条</button>
+            <button id="lockBtn" class="secondary" type="button">锁定</button>
+          </div>
+          <div class="row">
+            <button id="exportBtn" class="secondary grow" type="button">备份</button>
+            <button id="importBtn" class="secondary grow" type="button">恢复</button>
+          </div>
+          <input id="importFile" type="file" accept="application/json,.json" hidden>
+        </div>
+
+        <div class="list card">
+          <div class="list-head">
+            <input id="searchInput" type="search" placeholder="搜名称、网址、账号或标签">
+            <div id="counter" class="counter">0 条记录</div>
+          </div>
+          <div id="items" class="items"></div>
+        </div>
+      </aside>
+
+      <section class="editor card">
+        <div class="editor-head">
+          <h2 id="editorTitle">新记录</h2>
+          <button id="openUrlBtn" class="secondary" type="button">打开网址</button>
+        </div>
+
+        <div class="grid">
+          <label>
+            名称
+            <input id="nameInput" placeholder="邮箱、GitHub、学校平台">
+          </label>
+          <label>
+            标签
+            <input id="tagInput" placeholder="工作、学习、常用">
+          </label>
+          <label class="full">
+            网址
+            <input id="urlInput" type="url" placeholder="https://example.com">
+          </label>
+          <label>
+            账号
+            <input id="usernameInput" autocomplete="off" placeholder="用户名、邮箱或手机号">
+          </label>
+          <label>
+            密码
+            <div class="password-field">
+              <input id="passwordInput" type="password" autocomplete="off" placeholder="密码">
+              <button id="togglePasswordBtn" class="secondary icon" type="button" title="显示或隐藏密码">显</button>
+            </div>
+          </label>
+          <label class="full">
+            备注
+            <textarea id="noteInput" placeholder="密保提示、登录入口说明、绑定邮箱等"></textarea>
+          </label>
+        </div>
+
+        <div class="copy-grid">
+          <button id="copyUserBtn" class="secondary" type="button">复制账号</button>
+          <button id="copyPassBtn" class="secondary" type="button">复制密码</button>
+          <button id="copyUrlBtn" class="secondary" type="button">复制网址</button>
+        </div>
+
+        <div class="foot-actions">
+          <div class="left-actions">
+            <button id="generateBtn" class="secondary" type="button">随机密码</button>
+            <button id="clearBtn" class="secondary" type="button">清空</button>
+          </div>
+          <div class="right-actions">
+            <button id="deleteBtn" class="danger" type="button">删除</button>
+            <button id="saveBtn" type="button">保存</button>
+          </div>
+        </div>
+      </section>
+    </section>
+  </main>
+</body>
+</html>

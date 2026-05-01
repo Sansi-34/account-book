@@ -1,0 +1,15 @@
+{
+  "name": "account-book",
+  "version": "0.1.0",
+  "private": false,
+  "description": "A local-first account and password notebook.",
+  "scripts": {
+    "test": "node tests/crypto-smoke.js"
+  },
+  "keywords": [
+    "password-manager",
+    "local-first",
+    "webcrypto"
+  ],
+  "license": "MIT"
+}
