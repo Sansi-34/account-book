@@ -47,7 +47,7 @@
     </section>
 
     <section id="appView" class="app">
-      <aside>
+      <aside class="sidebar">
         <div class="toolbar card">
           <div class="row">
             <button id="addBtn" class="grow">加一条</button>
@@ -75,15 +75,18 @@
           <button id="openUrlBtn" class="secondary" type="button">打开网址</button>
         </div>
 
-        <div class="grid">
-          <label class="full quick-import">
-            一键识别
-            <textarea id="quickImportInput" placeholder="把一整段登录信息粘到这里，例如：名称、网址、账号、密码、备注"></textarea>
+        <div class="quick-import">
+          <div class="quick-import-head">
+            <strong>一键识别</strong>
             <div class="quick-import-actions">
               <button id="recognizeBtn" class="secondary" type="button">识别填入</button>
-              <button id="clearRecognizeBtn" class="secondary" type="button">清空识别框</button>
+              <button id="clearRecognizeBtn" class="secondary" type="button">清空</button>
             </div>
-          </label>
+          </div>
+          <textarea id="quickImportInput" placeholder="粘贴整段登录信息：名称、网址、账号、密码、备注"></textarea>
+        </div>
+
+        <div class="grid">
           <label>
             名称
             <input id="nameInput" placeholder="邮箱、GitHub、学校平台">
@@ -114,10 +117,10 @@
         </div>
 
         <div class="copy-grid">
+          <button id="openAndCopyBtn" class="quick-login" type="button">打开并复制密码</button>
           <button id="copyUserBtn" class="secondary" type="button">复制账号</button>
           <button id="copyPassBtn" class="secondary" type="button">复制密码</button>
           <button id="copyUrlBtn" class="secondary" type="button">复制网址</button>
-          <button id="openAndCopyBtn" class="secondary" type="button">打开并复制密码</button>
         </div>
 
         <div class="foot-actions">
