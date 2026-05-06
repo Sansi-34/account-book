@@ -44,6 +44,7 @@
     copyUserBtn: document.querySelector("#copyUserBtn"),
     copyPassBtn: document.querySelector("#copyPassBtn"),
     copyUrlBtn: document.querySelector("#copyUrlBtn"),
+    openAndCopyBtn: document.querySelector("#openAndCopyBtn"),
     generateBtn: document.querySelector("#generateBtn"),
     clearBtn: document.querySelector("#clearBtn"),
     deleteBtn: document.querySelector("#deleteBtn"),
@@ -243,6 +244,10 @@
       spans[0].textContent = record.username || "未填写账号";
       spans[1].textContent = record.url || record.tag || "无网址";
       item.addEventListener("click", () => fillForm(record));
+      item.addEventListener("dblclick", () => {
+        fillForm(record);
+        openUrlValue(record.url);
+      });
       el.items.appendChild(item);
     });
   }
@@ -360,14 +365,56 @@
     lock("已清空，可以设置新密码");
   }
 
-  function openCurrentUrl() {
-    const url = normalizeUrl(el.urlInput.value);
+  function openUrlValue(value) {
+    const url = normalizeUrl(value || "");
     if (!url) {
       showStatus("网址为空");
-      return;
+      return false;
     }
     window.open(url, "_blank", "noopener,noreferrer");
     noteActivity();
+    return true;
+  }
+
+  function openCurrentUrl() {
+    openUrlValue(el.urlInput.value);
+  }
+
+  async function openAndCopyPassword() {
+    openUrlValue(el.urlInput.value);
+    await copyText(el.passwordInput.value, "密码");
+  }
+
+  function handleShortcut(event) {
+    if (!isUnlocked()) return;
+    const key = event.key.toLowerCase();
+
+    if ((event.ctrlKey || event.metaKey) && key === "s") {
+      event.preventDefault();
+      saveCurrentRecord();
+      return;
+    }
+
+    if ((event.ctrlKey || event.metaKey) && key === "n") {
+      event.preventDefault();
+      clearForm();
+      noteActivity();
+      el.nameInput.focus();
+      return;
+    }
+
+    if ((event.ctrlKey || event.metaKey) && key === "k") {
+      event.preventDefault();
+      el.searchInput.focus();
+      el.searchInput.select();
+      noteActivity();
+      return;
+    }
+
+    if ((event.ctrlKey || event.metaKey) && event.shiftKey && key === "l") {
+      event.preventDefault();
+      lock();
+    }
   }
 
   function bindEvents() {
@@ -398,6 +445,7 @@
     el.copyUserBtn.addEventListener("click", () => copyText(el.usernameInput.value, "账号"));
     el.copyPassBtn.addEventListener("click", () => copyText(el.passwordInput.value, "密码"));
     el.copyUrlBtn.addEventListener("click", () => copyText(normalizeUrl(el.urlInput.value), "网址"));
+    el.openAndCopyBtn.addEventListener("click", openAndCopyPassword);
     el.openUrlBtn.addEventListener("click", openCurrentUrl);
     el.togglePasswordBtn.addEventListener("click", () => {
       state.passwordVisible = !state.passwordVisible;
@@ -409,6 +457,7 @@
     ["pointerdown", "keydown"].forEach(eventName => {
       document.addEventListener(eventName, noteActivity, { passive: true });
     });
+    document.addEventListener("keydown", handleShortcut);
     document.addEventListener("visibilitychange", () => {
       if (document.hidden && isUnlocked()) scheduleAutoLock();
     });
