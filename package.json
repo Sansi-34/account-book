@@ -4,7 +4,7 @@
   "private": false,
   "description": "A local-first account and password notebook.",
   "scripts": {
-    "test": "node tests/crypto-smoke.js"
+    "test": "node tests/crypto-smoke.js && node tests/quick-parse-smoke.js"
   },
   "keywords": [
     "password-manager",

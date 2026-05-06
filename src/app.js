@@ -45,6 +45,9 @@
     copyPassBtn: document.querySelector("#copyPassBtn"),
     copyUrlBtn: document.querySelector("#copyUrlBtn"),
     openAndCopyBtn: document.querySelector("#openAndCopyBtn"),
+    quickImportInput: document.querySelector("#quickImportInput"),
+    recognizeBtn: document.querySelector("#recognizeBtn"),
+    clearRecognizeBtn: document.querySelector("#clearRecognizeBtn"),
     generateBtn: document.querySelector("#generateBtn"),
     clearBtn: document.querySelector("#clearBtn"),
     deleteBtn: document.querySelector("#deleteBtn"),
@@ -68,6 +71,119 @@
     if (!value) return "";
     if (/^https?:\/\//i.test(value)) return value;
     return "https://" + value;
+  }
+
+  function cleanValue(value) {
+    return value
+      .replace(/^[：:\s"'“”‘’]+/, "")
+      .replace(/["'“”‘’]+$/, "")
+      .trim();
+  }
+
+  function findLabeledValue(lines, labels) {
+    const labelPattern = labels.join("|");
+    const regex = new RegExp("^\\s*(?:" + labelPattern + ")\\s*[:：=\\-]\\s*(.+)$", "i");
+    for (const line of lines) {
+      const match = line.match(regex);
+      if (match && match[1]) return cleanValue(match[1]);
+    }
+    return "";
+  }
+
+  function guessNameFromUrl(url) {
+    try {
+      const hostname = new URL(normalizeUrl(url)).hostname.replace(/^www\./, "");
+      return hostname.split(".")[0] || "";
+    } catch {
+      return "";
+    }
+  }
+
+  function parseQuickImport(text) {
+    const lines = text
+      .split(/\r?\n/)
+      .map(line => line.trim())
+      .filter(Boolean);
+    const joined = lines.join("\n");
+
+    const parsed = {
+      name: findLabeledValue(lines, ["名称", "名字", "标题", "网站", "站点", "name", "site", "title"]),
+      url: findLabeledValue(lines, ["网址", "链接", "地址", "url", "link"]),
+      username: findLabeledValue(lines, ["账号", "账户", "用户名", "用户", "邮箱", "手机号", "登录名", "user", "username", "account", "email", "phone", "login"]),
+      password: findLabeledValue(lines, ["密码", "口令", "pass", "password", "pwd"]),
+      note: findLabeledValue(lines, ["备注", "说明", "note", "memo"])
+    };
+
+    if (!parsed.url) {
+      const urlMatch = joined.match(/https?:\/\/[^\s"'<>，。；、]+|(?:www\.)?[a-z0-9-]+(?:\.[a-z0-9-]+)+(?:\/[^\s"'<>，。；、]*)?/i);
+      if (urlMatch) parsed.url = cleanValue(urlMatch[0]);
+    }
+
+    if (!parsed.username) {
+      const emailMatch = joined.match(/[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}/i);
+      const phoneMatch = joined.match(/(?:\+?86[-\s]?)?1[3-9]\d{9}/);
+      parsed.username = emailMatch ? emailMatch[0] : phoneMatch ? phoneMatch[0] : "";
+    }
+
+    if (!parsed.password) {
+      const passwordLine = lines.find(line => /密|pass|pwd/i.test(line));
+      if (passwordLine) {
+        const parts = passwordLine.split(/[:：=\-]\s*/);
+        if (parts.length > 1) parsed.password = cleanValue(parts.slice(1).join("-"));
+      }
+    }
+
+    if (!parsed.name && parsed.url) {
+      parsed.name = guessNameFromUrl(parsed.url);
+    }
+
+    const used = new Set([parsed.name, parsed.url, parsed.username, parsed.password, parsed.note].filter(Boolean));
+    const leftover = lines.filter(line => {
+      if (used.has(cleanValue(line))) return false;
+      return !/^\s*(名称|名字|标题|网站|站点|网址|链接|地址|账号|账户|用户名|用户|邮箱|手机号|登录名|密码|口令|备注|说明|name|site|title|url|link|user|username|account|email|phone|login|pass|password|pwd|note|memo)\s*[:：=\-]/i.test(line);
+    });
+    if (!parsed.note && leftover.length) parsed.note = leftover.join("\n");
+
+    return parsed;
+  }
+
+  function applyRecognizedInfo() {
+    const text = el.quickImportInput.value.trim();
+    if (!text) {
+      showStatus("先粘贴一段信息");
+      return;
+    }
+
+    const parsed = parseQuickImport(text);
+    const filled = [];
+    if (parsed.name) {
+      el.nameInput.value = parsed.name;
+      filled.push("名称");
+    }
+    if (parsed.url) {
+      el.urlInput.value = normalizeUrl(parsed.url);
+      filled.push("网址");
+    }
+    if (parsed.username) {
+      el.usernameInput.value = parsed.username;
+      filled.push("账号");
+    }
+    if (parsed.password) {
+      el.passwordInput.value = parsed.password;
+      filled.push("密码");
+    }
+    if (parsed.note) {
+      el.noteInput.value = parsed.note;
+      filled.push("备注");
+    }
+
+    if (!filled.length) {
+      showStatus("没识别出可填内容");
+      return;
+    }
+
+    showStatus("已识别：" + filled.join("、"));
+    noteActivity();
   }
 
   function isValidPayload(payload) {
@@ -439,6 +555,12 @@
     el.deleteBtn.addEventListener("click", deleteCurrentRecord);
     el.clearBtn.addEventListener("click", () => {
       clearForm();
+      noteActivity();
+    });
+    el.recognizeBtn.addEventListener("click", applyRecognizedInfo);
+    el.clearRecognizeBtn.addEventListener("click", () => {
+      el.quickImportInput.value = "";
+      showStatus("识别框已清空");
       noteActivity();
     });
     el.generateBtn.addEventListener("click", generatePassword);

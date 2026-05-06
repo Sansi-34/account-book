@@ -114,6 +114,24 @@ textarea {
   line-height: 1.6;
 }
 
+.quick-import {
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface-soft);
+}
+
+.quick-import textarea {
+  min-height: 76px;
+  background: #fff;
+}
+
+.quick-import-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
 input:focus,
 textarea:focus,
 select:focus {
@@ -494,6 +512,10 @@ h1 {
   .grid,
   .copy-grid {
     grid-template-columns: 1fr;
+  }
+
+  .quick-import-actions {
+    flex-direction: column;
   }
 
   .unlock,
